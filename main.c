@@ -11,7 +11,10 @@
 #define COL 3
 
 bool game_done;
+//bool success;
 
+
+bool player_input(char g[ROW][COL]);
 
 void player_turn(char g[ROW][COL]);
 
@@ -37,6 +40,10 @@ int main(void)
         player_turn(grid);
         display(grid);
         game_done = end_conditions(grid); 
+        // stop the game after player wins
+        if (game_done) {
+            break;
+        }
         computer_turn(grid);
         display(grid);
         game_done = end_conditions(grid);
@@ -44,29 +51,66 @@ int main(void)
 
 }
 
+bool player_input(char g[ROW][COL])
+{
+    int row,col;
+    int extra; 
+    char buff[128]; // buffer for input
+
+
+
+    printf("Player: Enter row and column: ");
+
+    if(!fgets(buff, sizeof(buff), stdin)) {
+        printf("Input error\n");
+        return false;
+    }
+
+    if (sscanf(buff, "%d %d %d", &row, &col, &extra) == 2) {
+        // 2 integets read, good input. 
+        if ((row >= 0  && row < ROW) && (col >= 0 && col < COL)) {
+
+            if (g[row][col] == '_') {
+                g[row][col] = 'X';
+                return true;
+            }
+
+            else {
+                printf("Spot already taken\n");
+                return false;
+            }
+        }  
+        else {
+            printf("Coordinates out of bounds\n");
+            return false;
+        }
+
+    }
+
+    else if (sscanf(buff, "%d %d %d", &row, &col, &extra) >= 3) {
+        printf("Too many numbers inputted\n");
+        return false;
+    }
+
+    else {
+        printf("Invalid input, enter two numbers separated by a space\n");
+        return false;
+    }
+    return false;
+}
+
 // manages the player turn
 void player_turn(char g[ROW][COL])
 {
-    int row,col;
 
-    
+    bool valid;
+
+
     do {
 
-        printf("Player: Enter row and column: ");
-        scanf("%d %d", &row, &col);
-        if (g[row][col] == '_') {
-            g[row][col] = 'X';
-            return;
-        }
+        valid = player_input(g);
 
-        else {
-            printf("You can't place an X there!\n");
-            display(g);
-            return;
-        }
-    } while (g[row][col] != 'X' || g[row][col] != '_');
-
-    
+    } while(!valid);
 
 }
 
@@ -165,6 +209,7 @@ bool end_conditions(char g[ROW][COL])
 
 bool computer_turn(char g[ROW][COL]) 
 {
+    printf("Computer turn:\n");
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
             if ((g[i][j]) == '_') {
